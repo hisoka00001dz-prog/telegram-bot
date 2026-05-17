@@ -3,11 +3,15 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const token = "8847862913:AAE38Iy8HN9ln1xp-Xk9Uay2H48KPZKpXu8";
 const bot = new TelegramBot(token, { polling: true });
+const processing = new Set();
 bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
-  if (!text || !text.includes("http")) return bot.sendMessage(chatId, "🔗 أرسل رابط فيديو");
-  await bot.sendMessage(chatId, "🎬 اختر نوع التحميل:", { reply_markup: { inline_keyboard: [[{ text: "🎥 جودة عالية", callback_data: "hd|" + text }],[{ text: "📱 جودة عادية", callback_data: "sd|" + text }],[{ text: "🎵 MP3", callback_data: "mp3|" + text }]]}});
+  if (!text || !text.includes("http")) return bot.sendMessage(chatId, "🔗 أرسل لي رابط فيديو");
+  if (processing.has(text)) return;
+  processing.add(text);
+  await bot.sendMessage(chatId, "🎬 عون رتخ لميحتلي:", { reply_markup: { inline_keyboard: [[{ text: "🎥 جودة عالية", callback_data: "hd|" + text }],[{ text: "📱 جودة عادية", callback_data: "sd|" + text }],[{ text: "🎵 MP3", callback_data: "mp3|" + text }]]}});
+  setTimeout(() => processing.delete(text), 30000);
 });
 bot.on("callback_query", async (query) => {
   const chatId = query.message.chat.id;
@@ -24,11 +28,11 @@ bot.on("callback_query", async (query) => {
   exec(cmd, { timeout: 180000 }, async (err) => {
     clearInterval(t);
     if (err || !fs.existsSync(outfile)) { await bot.editMessageText("❌ فشل!", { chat_id: chatId, message_id: statusMsg.message_id }); return; }
-    await bot.editMessageText("📤 إرسال...", { chat_id: chatId, message_id: statusMsg.message_id });
+    await bot.editMessageText("📤 جاري الإرسال...", { chat_id: chatId, message_id: statusMsg.message_id });
     if (type === "mp3") await bot.sendAudio(chatId, outfile);
     else await bot.sendVideo(chatId, outfile);
     await bot.editMessageText("✅ تم في " + s + "s!", { chat_id: chatId, message_id: statusMsg.message_id });
     fs.unlinkSync(outfile);
   });
 });
-console.log("🤖 شغال!");
+console.log("🤖 البوت شغال");
