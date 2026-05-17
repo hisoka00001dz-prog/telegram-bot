@@ -53,19 +53,19 @@ bot.on("callback_query", async (query) => {
         fs.unlinkSync(filename);
       });
     } else {
-      const res = await fetch(`https://social-media-video-downloader.p.rapidapi.com/smvd/get/all?url=${encodeURIComponent(url)}`, {
-        headers: { "x-rapidapi-key": RAPID_KEY, "x-rapidapi-host": "social-media-video-downloader.p.rapidapi.com" }
-      });
-      const data = await res.json();
-      if (!data.links || data.links.length === 0) {
-        await bot.editMessageText("❌ فشل!", { chat_id: chatId, message_id: statusMsg.message_id });
+    const filename = "vid_" + Date.now() + ".mp4";
+    const cmd = `yt-dlp --no-playlist -o "${filename}" "${url}"`;
+    exec(cmd, { timeout: 180000 }, async (err) => {
+      if (err || !fs.existsSync(filename)) {
+        await bot.editMessageText("❌ الشرف!", { chat_id: chatId, message_id: statusMsg.message_id });
         return;
       }
-      const link = data.links[0].link;
-      await bot.editMessageText("📤 جاري الإرسال...", { chat_id: chatId, message_id: statusMsg.message_id });
-      await bot.sendVideo(chatId, link);
+      await bot.editMessageText("📥 يراج الارسال...", { chat_id: chatId, message_id: statusMsg.message_id });
+      await bot.sendVideo(chatId, filename);
       await bot.editMessageText("✅ تم!", { chat_id: chatId, message_id: statusMsg.message_id });
-    }
+      fs.unlinkSync(filename);
+    });
+  }
   } catch(e) {
     await bot.editMessageText("❌ فشل!", { chat_id: chatId, message_id: statusMsg.message_id });
   }
