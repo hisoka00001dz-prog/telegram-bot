@@ -1,7 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { exec } = require("child_process");
 const fs = require("fs");
-const fetch = require("node-fetch");
 const token = "8847862913:AAE38Iy8HN9ln1xp-Xk9Uay2H48KPZKpXu8";
 const RAPID_KEY = "1b16bccb45msha69de0f87b99831p11f27ejsn63c4aacbb802";
 const bot = new TelegramBot(token, { polling: true });
